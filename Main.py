@@ -38,15 +38,7 @@ def handle_message(event):
     sender_id = event.source.user_id
     incoming_text = event.message.text
     reply_token = event.reply_token
-    #
-    # # 2. parse the incoming text to get the target ID from database
-    # SN = incoming_text[0:11]
-    # #2.1 check if the data format is correct or not
-    #
-    #
-    # #2.2 Use SN to send API to database --> return target ID, hospital name
-    # # getter = database_connector()
-    # # getter.get_data("API_endpoint", f"{SN}")
+
     # 3. Send confirmation reply to sender
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)

@@ -5,14 +5,13 @@ database = [{'sn':'SN68-00001', 'hos':'Hospital A', 'dr':"Dr. Teddy"},
             ]
 
 input = input("Input: ")
-for_search = input[0:11]
-request = input[11:]
+for_api = input[0:11]
 
-target_hos = [entry['hos'] for entry in database if entry['sn'] == for_search]
-print(f'{request}')
+#check if data format is correct?
 
 
-if target_hos:
-    print(f'from {target_hos}')
-else:
-    print('Wrong input style')
+#deliver to API endpoint
+print(for_api)
+
+#deliver to target recipient
+print(input)
