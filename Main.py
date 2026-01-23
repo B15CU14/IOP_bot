@@ -5,6 +5,8 @@ from linebot.v3.exceptions import InvalidSignatureError
 from linebot.v3.messaging import (Configuration,ApiClient,MessagingApi,MessagingApiBlob,PushMessageRequest,ReplyMessageRequest,
     TextMessage,ImageMessage)
 from linebot.v3.webhooks import MessageEvent, TextMessageContent, ImageMessageContent
+import database_connector
+from database_connector import database
 
 app = Flask(__name__)
 # --- CONFIGURATION ---
@@ -13,7 +15,6 @@ CHANNEL_ACCESS_TOKEN = '0vIy9ECWW1gddmp66e5kwlHY1XhlwSoV5pXS7fHzAnu3iKjqH6mhznO3
 configuration = Configuration(access_token=CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 TARGET_ID = 'Uf71cb7cdb2dc06017c74e8e6350f0db1'
-TARGET_HOSPITAL = 'Hospital A'
 
 # ---------------- Ensure a folder exists to save images-------------------
 IMAGE_DIR = './downloaded_images'
@@ -36,8 +37,15 @@ def callback():
 def handle_message(event):
     # 1. Capture the data
     sender_id = event.source.user_id
-    incoming_text = event.message.text
+    input = event.message.text
     reply_token = event.reply_token
+
+    # 2. parse the data to send API to database
+    sn = input[0:10]
+
+    # 3. Search database
+    db = database_connector.DATABASECONNECTOR()
+    result = db.work(sn=sn)
 
     # 3. Send confirmation reply to sender
     with ApiClient(configuration) as api_client:
@@ -45,18 +53,18 @@ def handle_message(event):
         line_bot_api.reply_message(
             ReplyMessageRequest(
                 reply_token=reply_token,
-                messages=[TextMessage(text=f'Received, your message is forward to {TARGET_HOSPITAL}')]
+                messages=[TextMessage(text=f'Received, {result['dr']} your message is forward to {result['hos']}')]
             )
         )
     # 4. Push message to destination, test in terminal
-    if sender_id != TARGET_ID:
-       try:
-            line_bot_api.push_message(
-                PushMessageRequest(to=TARGET_ID, messages=[TextMessage(text=incoming_text)])
-            )
-            print(f"✅ SUCCESS: Relayed to {TARGET_ID}")
-       except Exception as e:
-            print(f"❌ ERROR: Failed to relay. Reason: {e}")
+    # if sender_id != TARGET_ID:
+    #    try:
+    #         line_bot_api.push_message(
+    #             PushMessageRequest(to=TARGET_ID, messages=[TextMessage(text=incoming_text)])
+    #         )
+    #         print(f"✅ SUCCESS: Relayed to {TARGET_ID}")
+    #    except Exception as e:
+    #         print(f"❌ ERROR: Failed to relay. Reason: {e}")
 
 
 #__________________IMAGE RELAY HANDLER__________________
